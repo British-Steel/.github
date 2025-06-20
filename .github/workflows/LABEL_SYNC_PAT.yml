@@ -1,7 +1,7 @@
 name: Add labels to all org repos
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  workflow_dispatch:
 
 jobs:
   label-all-repos:
@@ -13,7 +13,10 @@ jobs:
         with:
           github-token: ${{ secrets.LABEL_SYNC_PAT }}
           script: |
-            const org = 'British-Steel'; // 🔁 Change this to your actual org login
+            const org = 'British-Steel'; // 👈 Change if needed
+
+            const skipRepos = ['grafana']; // 👈 Repos to skip
+
             const desiredLabels = [
               {
                 name: 'task',
@@ -34,26 +37,36 @@ jobs:
             });
 
             for (const repo of repos) {
+              if (skipRepos.includes(repo.name)) {
+                console.log(`⏭️ Skipping repo: ${repo.name}`);
+                continue;
+              }
+
               console.log(`🔍 Checking repo: ${repo.name}`);
-              const labels = await github.rest.issues.listLabelsForRepo({
-                owner: org,
-                repo: repo.name
-              });
 
-              for (const label of desiredLabels) {
-                const exists = labels.data.some(l => l.name.toLowerCase() === label.name.toLowerCase());
+              try {
+                const labels = await github.rest.issues.listLabelsForRepo({
+                  owner: org,
+                  repo: repo.name
+                });
 
-                if (!exists) {
-                  await github.rest.issues.createLabel({
-                    owner: org,
-                    repo: repo.name,
-                    name: label.name,
-                    color: label.color,
-                    description: label.description
-                  });
-                  console.log(`✅ Created label "${label.name}" in ${repo.name}`);
-                } else {
-                  console.log(`ℹ️ Label "${label.name}" already exists in ${repo.name}`);
+                for (const label of desiredLabels) {
+                  const exists = labels.data.some(l => l.name.toLowerCase() === label.name.toLowerCase());
+
+                  if (!exists) {
+                    await github.rest.issues.createLabel({
+                      owner: org,
+                      repo: repo.name,
+                      name: label.name,
+                      color: label.color,
+                      description: label.description
+                    });
+                    console.log(`✅ Created label "${label.name}" in ${repo.name}`);
+                  } else {
+                    console.log(`ℹ️ Label "${label.name}" already exists in ${repo.name}`);
+                  }
                 }
+              } catch (err) {
+                console.log(`⚠️ Skipping ${repo.name} due to error: ${err.message}`);
               }
             }
