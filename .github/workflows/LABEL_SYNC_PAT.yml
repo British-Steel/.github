@@ -37,6 +37,7 @@ jobs:
             });
 
             for (const repo of repos) {
+              console.log(`- ${repo.name}`);
               if (skipRepos.includes(repo.name)) {
                 console.log(`⏭️ Skipping repo: ${repo.name}`);
                 continue;
