@@ -35,7 +35,7 @@ jobs:
               per_page: 100,
               type: 'all'
             });
-
+            console.log(`🔎 Found ${repos.length} repositories`);
             for (const repo of repos) {
               console.log(`- ${repo.name}`);
               if (skipRepos.includes(repo.name)) {
