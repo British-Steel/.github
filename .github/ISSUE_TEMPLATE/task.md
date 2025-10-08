@@ -1,6 +1,6 @@
 ---
 name: Task
-about: Describe this issue template's purpose here.
+about: Describe this task that needs to be completed.
 title: ''
 labels: ''
 assignees: ''
